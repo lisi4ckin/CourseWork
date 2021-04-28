@@ -1,0 +1,4 @@
+*.dll
+Debug
+x64
+.vs
