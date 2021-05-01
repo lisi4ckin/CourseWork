@@ -71,19 +71,15 @@ void drawMapEnemy(RenderWindow& window, int map[][sizeMap]) {
 	}
 }
 
-int stepPlayer(int map[][sizeMap], RenderWindow &window) {
-	while (true) {
-		if (Mouse::isButtonPressed(Mouse::Left)) {
-			Vector2i localPositionMouse = Mouse::getPosition(window);
-			cout << localPositionMouse.y - offsetBorder << " " << localPositionMouse.x - offsetBorder - 600 << endl;
-			if (map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] == 1) {
-				map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] = 2;
-				return 1;
-			}
-			else {
-				return 0;
-			}
-		}
+int stepPlayer(int map[][sizeMap], RenderWindow& window) {
+	Vector2i localPositionMouse = Mouse::getPosition(window);
+	cout << localPositionMouse.y - offsetBorder << " " << localPositionMouse.x - offsetBorder - 600 << endl;
+	if (map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] == 1) {
+		map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] = 2;
+		return 1;
+	}
+	else {
+		return 0;
 	}
 }
 
@@ -114,21 +110,17 @@ int main() {
 			if (event.type == Event::Closed) {
 				mainWindow.close();
 			}
+			if (event.type == event.MouseButtonReleased && event.mouseButton.button == Mouse::Left) {
+				int k = stepPlayer(mapEnemy, mainWindow);
+				if (k == 0) {
+					stepEnemy(mapPlayer, mainWindow);
+				}
+			}
 		}
 		drawMap(mainWindow, mapPlayer);
 		drawMapEnemy(mainWindow, mapEnemy);
-		while (stepPlayer(mapEnemy, mainWindow) == 1) {
-			drawMapEnemy(mainWindow, mapEnemy);
-			stepPlayer(mapEnemy, mainWindow);
-		}
-		while (stepEnemy(mapPlayer, mainWindow) == 1) {
-			drawMap(mainWindow, mapPlayer);
-			stepEnemy(mapPlayer, mainWindow);
-		}
-		//stepEnemy(mapPlayer, mainWindow);
-		//stepPlayer(mapEnemy, mainWindow);
 		mainWindow.display();
-		Sleep(100);
+		Sleep(1000);
 	}
 	return 0;
 }
