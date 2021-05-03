@@ -41,11 +41,14 @@ void drawMap(RenderWindow &window, int map[][sizeMap]) {
 			if (map[i][j] == 0) {
 				cell.setFillColor(Color::White);
 			}
-			if (map[i][j] == 1) {
+			else if (map[i][j] == 1) {
 				cell.setFillColor(Color::Green);
 			}
-			if (map[i][j] == 2) {
+			else if (map[i][j] == 2) {
 				cell.setFillColor(Color::Red);
+			}
+			else if (map[i][j] == 3) {
+				cell.setFillColor(Color::Blue);
 			}
 			cell.setPosition(j * sizeCell + offsetBorder, i * sizeCell + offsetBorder);
 			window.draw(cell);
@@ -61,6 +64,9 @@ void drawMapEnemy(RenderWindow& window, int map[][sizeMap]) {
 		for (int j = 0; j < sizeMap; j++) {
 			if (map[i][j] == 2) {
 				cell.setFillColor(Color::Red);
+			}
+			else if (map[i][j] == 3){
+				cell.setFillColor(Color::Blue);
 			}
 			else {
 				cell.setFillColor(Color::White);	
@@ -78,8 +84,10 @@ int stepPlayer(int map[][sizeMap], RenderWindow& window) {
 		map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] = 2;
 		return 1;
 	}
-	else {
-		return 0;
+	else if (map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] == 0) {
+		map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] = 3; {
+			return 0;
+		}
 	}
 }
 
@@ -91,7 +99,8 @@ int stepEnemy(int map[][sizeMap], RenderWindow& window) {
 		map[y][x] = 2;
 		return 1;
 	}
-	else {
+	else if (map[y][x] == 0){
+		map[y][x] = 3;
 		return 0;
 	}
 }
@@ -120,7 +129,7 @@ int main() {
 		drawMap(mainWindow, mapPlayer);
 		drawMapEnemy(mainWindow, mapEnemy);
 		mainWindow.display();
-		Sleep(1000);
+		Sleep(100);
 	}
 	return 0;
 }
