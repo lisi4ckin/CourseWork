@@ -91,10 +91,7 @@ int stepPlayer(int map[][sizeMap], RenderWindow& window) {
 	}
 }
 
-int stepEnemy(int map[][sizeMap], RenderWindow& window) {
-	int x = rand() % 3;
-	int y = rand() % 10;
-	cout << x << " " << y << endl;
+int stepEnemy(int map[][sizeMap], RenderWindow& window, int x, int y) {
 	if (map[y][x] == 1) {
 		map[y][x] = 2;
 		return 1;
@@ -120,9 +117,30 @@ int main() {
 				mainWindow.close();
 			}
 			if (event.type == event.MouseButtonReleased && event.mouseButton.button == Mouse::Left) {
-				int k = stepPlayer(mapEnemy, mainWindow);
-				if (k == 0) {
-					stepEnemy(mapPlayer, mainWindow);
+				int player = stepPlayer(mapEnemy, mainWindow);
+				if (player == 0) {
+					int x = rand() % 10;
+					int y = rand() % 10;
+					while (mapPlayer[y][x] != 0 && mapPlayer[y][x] != 1) {
+						x = rand() % 10;
+						y = rand() % 10;
+					}
+					int enemy = stepEnemy(mapPlayer, mainWindow, x, y);
+					while (enemy == 1) {
+						y++;
+						enemy = stepEnemy(mapPlayer, mainWindow, x, y);
+						if (enemy == 1) {
+							y++;
+							enemy = stepEnemy(mapPlayer, mainWindow, x, y);
+						}
+						else {
+							enemy = stepEnemy(mapPlayer, mainWindow, x + 1, y);
+							if (enemy == 1) {
+								x++;
+								enemy = stepEnemy(mapPlayer, mainWindow, x + 1, y);
+							}
+						}
+					}
 				}
 			}
 		}
