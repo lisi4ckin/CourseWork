@@ -127,11 +127,10 @@ int main() {
 					}
 					int enemy = stepEnemy(mapPlayer, mainWindow, x, y);
 					while (enemy == 1) {
-						y++;
-						enemy = stepEnemy(mapPlayer, mainWindow, x, y);
+						enemy = stepEnemy(mapPlayer, mainWindow, x, y + 1);
 						if (enemy == 1) {
 							y++;
-							enemy = stepEnemy(mapPlayer, mainWindow, x, y);
+							enemy = stepEnemy(mapPlayer, mainWindow, x, y + 1);
 						}
 						else {
 							enemy = stepEnemy(mapPlayer, mainWindow, x + 1, y);
