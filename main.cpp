@@ -12,8 +12,12 @@ const int sizeMap = 10;
 const int sizeCell = 48;
 const int offsetBorder = 100;
 
-void loadMap(string nameMapFile, int map[][sizeMap]) {
+bool loadMap(string nameMapFile, int map[][sizeMap]) {
 	ifstream file(nameMapFile);
+	if (!file.is_open()) {
+		cout << "Файл не может быть открыт!!!" << endl;
+		return false;
+	}
 	while (file.is_open()) {
 		while (!file.eof()) {
 			for (int i = 0; i < sizeMap; i++) {
@@ -23,12 +27,6 @@ void loadMap(string nameMapFile, int map[][sizeMap]) {
 			}
 		}
 		file.close();
-	}
-	for (int i = 0; i < sizeMap; i++) {
-		for (int j = 0; j < sizeMap; j++) {
-			cout << map[i][j] << " ";
-		}
-		cout << endl;
 	}
 }
 
@@ -79,8 +77,9 @@ void drawMapEnemy(RenderWindow& window, int map[][sizeMap]) {
 
 int stepPlayer(int map[][sizeMap], RenderWindow& window) {
 	Vector2i localPositionMouse = Mouse::getPosition(window);
-	cout << localPositionMouse.y - offsetBorder << " " << localPositionMouse.x - offsetBorder - 600 << endl;
-	if (map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] == 1) {
+	//Mouse::setPosition(Vector2i(700, 100), window);
+	cout << (localPositionMouse.y - offsetBorder) / sizeCell << " " << (localPositionMouse.x - offsetBorder - 600) / sizeCell << endl;
+	if (map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] == 1)  {
 		map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder - 600) / sizeCell] = 2;
 		return 1;
 	}
@@ -91,7 +90,18 @@ int stepPlayer(int map[][sizeMap], RenderWindow& window) {
 	}
 }
 
-int stepEnemy(int map[][sizeMap], RenderWindow& window, int x, int y) {
+void refactorMapPlayer(int map[][sizeMap], RenderWindow& window) {
+	Vector2i localPositionMouse = Mouse::getPosition(window);
+	cout << (localPositionMouse.y - offsetBorder) / sizeCell << " " << (localPositionMouse.x - offsetBorder) / sizeCell << endl;
+	if (map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder) / sizeCell] == 1) {
+		map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder) / sizeCell] = 0;
+	}
+	else if (map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder) / sizeCell] == 0) {
+		map[(localPositionMouse.y - offsetBorder) / sizeCell][(localPositionMouse.x - offsetBorder) / sizeCell] = 1;
+	}
+}
+
+int stepEnemy(int map[][sizeMap], int x, int y) {
 	if (map[y][x] == 1) {
 		map[y][x] = 2;
 		return 1;
@@ -106,8 +116,14 @@ int main() {
 
 	int mapPlayer[sizeMap][sizeMap];
 	int mapEnemy[sizeMap][sizeMap];
-	loadMap("mapFirst.txt", mapPlayer);
-	loadMap("mapSecond.txt", mapEnemy);
+	int countEnemy = 20, countPlayer = 20;
+	bool refactor = true;
+	string nameOffFile;
+	getline(cin, nameOffFile);
+	if (loadMap(nameOffFile, mapPlayer));
+	else return 0;
+	if (loadMap("mapSecond.txt", mapEnemy));
+	else return 0;
 	srand(time(NULL));
 	RenderWindow mainWindow(VideoMode(1300, 600), "Main Window");
 	while (mainWindow.isOpen()) {
@@ -116,37 +132,53 @@ int main() {
 			if (event.type == Event::Closed) {
 				mainWindow.close();
 			}
-			if (event.type == event.MouseButtonReleased && event.mouseButton.button == Mouse::Left) {
+			if (event.type == event.MouseButtonReleased && event.mouseButton.button == Mouse::Right && refactor) {
+				refactorMapPlayer(mapPlayer, mainWindow);
+			}
+			else if (event.type == event.MouseButtonReleased && event.mouseButton.button == Mouse::Left) {
+				refactor = false;
 				int player = stepPlayer(mapEnemy, mainWindow);
-				if (player == 0) {
+				if (player == 1) {
+					countPlayer--;
+				}
+				else if(player == 0) {
 					int x = rand() % 10;
 					int y = rand() % 10;
 					while (mapPlayer[y][x] != 0 && mapPlayer[y][x] != 1) {
 						x = rand() % 10;
 						y = rand() % 10;
 					}
-					int enemy = stepEnemy(mapPlayer, mainWindow, x, y);
+					int enemy = stepEnemy(mapPlayer, x, y);
 					while (enemy == 1) {
-						enemy = stepEnemy(mapPlayer, mainWindow, x, y + 1);
+						enemy = stepEnemy(mapPlayer, x, y + 1);
 						if (enemy == 1) {
 							y++;
-							enemy = stepEnemy(mapPlayer, mainWindow, x, y + 1);
+							enemy = stepEnemy(mapPlayer, x, y + 1);
 						}
 						else {
-							enemy = stepEnemy(mapPlayer, mainWindow, x + 1, y);
+							enemy = stepEnemy(mapPlayer, x + 1, y);
 							if (enemy == 1) {
 								x++;
-								enemy = stepEnemy(mapPlayer, mainWindow, x + 1, y);
+								countEnemy--;
+								enemy = stepEnemy(mapPlayer, x + 1, y);
 							}
 						}
 					}
 				}
 			}
+			if (countEnemy == 0 || countPlayer == 0) {
+				if (countEnemy == 0) {
+					cout << "Computer wins this game!\n";
+				}
+				else {
+					cout << "Player wins this game!" << endl;
+				}
+				mainWindow.close();
+			}
 		}
 		drawMap(mainWindow, mapPlayer);
 		drawMapEnemy(mainWindow, mapEnemy);
 		mainWindow.display();
-		Sleep(100);
 	}
 	return 0;
 }
